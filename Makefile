@@ -2,8 +2,7 @@
 CXX = g++
 
 # Drapeaux de compilation
-CXXFLAGS = -Wall -Wextra -std=c++17
-
+CXXFLAGS = -Wall -Wextra -std=c++17 -floop-interchange -floop-strip-mine -floop-block -floop-parallelize-all -ftree-parallelize-loops=8 -Ofast -march=native -funroll-loops -flto -fprefetch-loop-arrays 
 # Nom de l'exécutable
 TARGET = Heuristic_PFSP_SLS
 
@@ -21,6 +20,10 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
 # Règle par défaut
 all: $(TARGET)
+
+# règle pour générer l'executable avec profiler
+profile: CXXFLAGS += -pg
+profile: $(TARGET)
 
 # Règle pour générer l'exécutable
 $(TARGET): $(OBJS)
