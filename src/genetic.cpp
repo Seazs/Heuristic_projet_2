@@ -24,8 +24,12 @@ std::vector<int> genetic(PFSP& pfsp) {
     std::vector<std::vector<int>> population;
     population.push_back(pfsp.simplifiedRZHeuristic()); // Add an initial solution using RZ heuristic
 
+    //create a seed based on time
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    
+    
     for (int i = 0; i < POPULATION_SIZE - 1; ++i) {
-        population.push_back(pfsp.generateRandomSolution()); // Add random solutions to the population
+        population.push_back(pfsp.generateRandomSolution(seed)); // Add random solutions to the population
     }
 
     std::vector<int> bestSolution = population[0];
@@ -47,7 +51,7 @@ std::vector<int> genetic(PFSP& pfsp) {
             }
         }
     }
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    //unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(indices.begin(), indices.end(), gen);
 
     // Start timing
@@ -80,13 +84,25 @@ std::vector<int> genetic(PFSP& pfsp) {
             }
         }
         // Apply iterative improvement (local search) on each solution
-        for (auto& individual : nextPopulation) {
-            //std::cout << "Applying iterative improvement..." << std::endl;
-            individual = pfsp.iterative_improvement_first(individual,neighboor_function, "insert", indices);
-            // std::cout<< "Finished applying iterative improvement..." << std::endl;
-            // std::cout<< ((float(clock() - begin_time) / CLOCKS_PER_SEC)) << std::endl;
+        // std::cout << "Applying iterative improvement..." << std::endl;
+        // std::cout<< ((float(clock() - begin_time) / CLOCKS_PER_SEC)) << std::endl;
+
+        std::sort(nextPopulation.begin(), nextPopulation.end(), [&pfsp](const std::vector<int>& a, const std::vector<int>& b) {
+            return pfsp.getTotalCompletionTime(a) < pfsp.getTotalCompletionTime(b);
+        });
+
+        for (size_t i = 0; i < POPULATION_SIZE_IMPROVED; ++i) {
+            nextPopulation[i] = pfsp.iterative_improvement_first(nextPopulation[i], neighboor_function, "insert", indices);
         }
-        
+
+        // for (auto& individual : nextPopulation) {
+            
+        //     individual = pfsp.iterative_improvement_first(individual,neighboor_function, "insert", indices);
+        //     // std::cout<< "Finished applying iterative improvement..." << std::endl;
+        //     // std::cout<< ((float(clock() - begin_time) / CLOCKS_PER_SEC)) << std::endl;
+        // }
+        // std::cout << "Finished applying iterative improvement..." << std::endl;
+        // std::cout<< ((float(clock() - begin_time) / CLOCKS_PER_SEC)) << std::endl;
 
         // Merge the old and new populations
         population.insert(population.end(), nextPopulation.begin(), nextPopulation.end());
@@ -99,17 +115,24 @@ std::vector<int> genetic(PFSP& pfsp) {
 
         // Find the best solution in the current population
         std::vector<int> bestOfPopulation = population[0];
+        std::vector<int> lastOfPopulation = population[population.size() - 1];
         int score = pfsp.getTotalCompletionTime(bestOfPopulation);
+        int lastScore = pfsp.getTotalCompletionTime(lastOfPopulation);
+
+        // std::cout << "Best score: " << score << std::endl;
+        // std::cout << "Last score: " << lastScore << std::endl;
 
         // Update the best solution if a better one is found
+        std::cout << ((float(clock() - begin_time) / CLOCKS_PER_SEC)) << " " << bestScore << std::endl;
         if (score < bestScore) {
             bestScore = score;
             bestSolution = bestOfPopulation;
-            std::cout << ((float(clock() - begin_time) / CLOCKS_PER_SEC)) << " " << bestScore << std::endl;
+            
             unsuccessful = 0;
         } else {
             ++unsuccessful;
         }
+        // std::cout << "finished genetic iteration..." << std::endl;
     }
 
     return bestSolution;
@@ -156,9 +179,15 @@ std::vector<int> crossover(const std::vector<int>& parent1, const std::vector<in
 }
 
 void mutate(std::vector<int>& individual, PFSP& pfsp, std::mt19937& rng) {
-    // Swap mutation
+    // Insert mutation with intensity
     std::uniform_int_distribution<int> dist(0, individual.size() - 1);
-    int index1 = dist(rng);
-    int index2 = dist(rng);
-    std::swap(individual[index1], individual[index2]);
+    for (int i = 0; i < MUTATION_INTENSITY; ++i) {
+        int fromIndex = dist(rng);
+        int toIndex = dist(rng);
+        if (fromIndex != toIndex) {
+            int job = individual[fromIndex];
+            individual.erase(individual.begin() + fromIndex);
+            individual.insert(individual.begin() + toIndex, job);
+        }
+    }
 }

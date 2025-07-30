@@ -2,7 +2,7 @@
 CXX = g++
 
 # Drapeaux de compilation
-CXXFLAGS = -Wall -Wextra -std=c++17 -floop-interchange -floop-strip-mine -floop-block -floop-parallelize-all -ftree-parallelize-loops=8 -Ofast -march=native -funroll-loops -flto -fprefetch-loop-arrays 
+CXXFLAGS = -Wall -Wextra -std=c++17 -floop-interchange -floop-strip-mine -floop-block -floop-parallelize-all -ftree-parallelize-loops=4 -Ofast -march=native -funroll-loops -flto -fprefetch-loop-arrays 
 # Nom de l'exécutable
 TARGET = Heuristic_PFSP_SLS
 
@@ -30,7 +30,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # Règle pour générer les fichiers objets
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/constant.hpp
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

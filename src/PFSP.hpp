@@ -31,6 +31,7 @@ public:
 
     // initial solution generation
     std::vector<int> generateRandomSolution();
+    std::vector<int> generateRandomSolution(unsigned int seed);
     std::vector<int> simplifiedRZHeuristic();
 
     // improvement methods

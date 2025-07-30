@@ -155,6 +155,14 @@
         return jobsOrder;
     }
 
+    std::vector<int> PFSP::generateRandomSolution(unsigned int seed){
+        std::vector<int> jobsOrder(this->numJobs);
+        std::iota(jobsOrder.begin(), jobsOrder.end(), 0); // Fill with 0 to numJobs-1
+        std::mt19937 g(seed);
+        std::shuffle(jobsOrder.begin(), jobsOrder.end(), g); // Shuffle to create a random permutation
+        return jobsOrder;
+    }
+
     std::vector<int> PFSP::simplifiedRZHeuristic() {
         std::vector<int> jobsOrder;
 
@@ -254,7 +262,6 @@
                     bestOrder = neighborOrder;
                     copyMakespanTable(this->makespanTable, neighborMakespanTable, this->numJobs, this->numMachines);
                     improved = true;
-                    // std::cout << "Improved makespan: " << bestTCT << std::endl;
                     break;
                 }
             }

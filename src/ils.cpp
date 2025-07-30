@@ -58,7 +58,7 @@ std::vector<int> ils(PFSP& pfsp) {
         //std::cout<< "Applying iterative improvement..." << std::endl;
         newSolution = pfsp.iterative_improvement_first(currentSolution, neighboor_function, "insert", indices);
         // Calculate the total completion time of the perturbed solution
-        int perturbedTCT = pfsp.getTotalCompletionTime(newSolution);
+        int perturbedTCT = pfsp.getTotalCompletionTime(newSolution, pfsp.makespanTable);
         // If the perturbed solution is better than the current best solution, update it
         //std::cout<< "currentTCT: " << currentTCT << " | perturbedTCT: " << perturbedTCT << std::endl;
         //std::cout<< "bestTCT: " << bestTCT << std::endl;
